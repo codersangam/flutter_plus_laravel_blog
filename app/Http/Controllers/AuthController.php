@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -23,15 +24,17 @@ class AuthController extends Controller
         $user = new User();
         $user->name = $attrs['name'];
         $user->email = $attrs['email'];
-        $user->password = bcrypt($attrs['password']);
+        $user->password = Hash::make('password');
         $user->save();
 
+        $token = $user->createToken('secret')->plainTextToken;
 
-        // Return user and tokens in response
-        return response([
+        $response = [
             'user' => $user,
-            'token' => $user->createToken('secret')->plainTextToken
-        ], 200);
+            'token' => $token
+        ];
+
+        return response($response, 200);
     }
 
     // Login Users
@@ -44,23 +47,28 @@ class AuthController extends Controller
             'password'      => 'required|min:8',
         ]);
 
-        // Attempt login
-        if (!Auth::attempt($attrs)) {
+        $user = User::where('email', $attrs['email'])->first();
+
+        if (!$user || Hash::check($attrs['password'], $user->password)) {
             return response([
-                'message' => 'Invalid Credentials.'
-            ], 403);
+                'message' => 'Invalid Credentials'
+            ], 401);
         }
 
-        //return user & token in response
-        return response([
-            'user' => auth()->user(),
-            'token' => auth()->user()->plainTextToken
-        ], 200);
+        $token = $user->createToken('secret')->plainTextToken;
+
+        $response = [
+            'user' => $user,
+            'token' => $token
+        ];
+
+        return response($response, 201);
     }
 
     // Logout Users
-    public function logout()
+    public function logout(Request $request)
     {
+        $request->user()->currentAccessToken()->delete();
         return response([
             'message' => 'Logout success.'
         ], 200);
