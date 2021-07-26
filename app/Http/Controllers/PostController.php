@@ -10,12 +10,16 @@ class PostController extends Controller
 {
     public function index()
     {
-        $posts = Post::orderBy('creadted_at', 'desc')
-            ->with('user_id, name, image')
+        $posts = Post::orderBy('created_at', 'desc')
+            ->with('user:id, name, image')
             ->withCount('comments', 'likes')
             ->get();
 
-        return response($posts, 200);
+        $response = [
+            'post' => $posts
+        ];
+
+        return response($response, 200);
     }
 
     public function store(Request $request)
@@ -24,10 +28,10 @@ class PostController extends Controller
             'body' => 'required|string'
         ]);
 
-        $posts = new Post();
-        $posts->body = $attrs['body'];
-        $posts->auth()->user()->id;
-        $posts->save();
+        $posts = Post::create([
+            'body' => $attrs['body'],
+            'user_id' => auth()->user()->id
+        ]);
 
         $response = [
             'message' => 'Post Created',
@@ -60,7 +64,8 @@ class PostController extends Controller
             return response(
                 [
                     'message' => 'Permission denied'
-                ]
+                ],
+                403
             );
         }
 
