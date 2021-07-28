@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
+
 class AuthController extends Controller
 {
     // Register Users
@@ -78,6 +79,26 @@ class AuthController extends Controller
     public function user()
     {
         return response([
+            'user' => auth()->user()
+        ], 200);
+    }
+
+    // update users
+    public function update(Request $request)
+    {
+        $attrs = $request->validate([
+            'name' => 'required|string'
+        ]);
+
+        $image = $this->saveImage($request->image, 'profiles');
+
+        auth()->user()->update([
+            'name' => $attrs['name'],
+            'image' => $image
+        ]);
+
+        return response([
+            'message' => 'User updated.',
             'user' => auth()->user()
         ], 200);
     }

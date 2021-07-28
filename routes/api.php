@@ -33,6 +33,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     // User
     Route::post('logout', [AuthController::class, 'logout']);
     Route::get('user', [AuthController::class, 'user']);
+    Route::post('user', [AuthController::class, 'update']);
 
     // Posts
     Route::get('posts', [PostController::class, 'index']);  //all posts
