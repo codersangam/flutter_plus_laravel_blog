@@ -13,6 +13,10 @@ class PostController extends Controller
         $posts = Post::orderBy('created_at', 'desc')
             ->with('user:id, name, image')
             ->withCount('comments', 'likes')
+            ->with('likes', function ($like) {
+                return $like->where('user_id', auth()->user()->id)
+                    ->select('id', 'user_id', 'post_id')->get();
+            })
             ->get();
 
         $response = [
@@ -22,15 +26,18 @@ class PostController extends Controller
         return response($response, 200);
     }
 
-    public function store(Request $request)
+    public function store(Request $request, $image)
     {
         $attrs = $request->validate([
             'body' => 'required|string'
         ]);
 
+        $image = $this->saveImage($request->$image, 'posts');
+
         $posts = Post::create([
             'body' => $attrs['body'],
-            'user_id' => auth()->user()->id
+            'user_id' => auth()->user()->id,
+            'image' => $image
         ]);
 
         $response = [
