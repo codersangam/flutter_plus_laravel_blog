@@ -31,23 +31,23 @@ Route::post('login', [AuthController::class, 'login']);
 Route::group(['middleware' => ['auth:sanctum']], function () {
 
     // User
-    Route::post('logout', [AuthController::class, 'logout']);
-    Route::get('user', [AuthController::class, 'user']);
-    Route::post('user', [AuthController::class, 'update']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/user', [AuthController::class, 'user']);
+    Route::put('/user', [AuthController::class, 'update']);
 
     // Posts
-    Route::get('posts', [PostController::class, 'index']);  //all posts
-    Route::post('posts', [PostController::class, 'store']);  //create post
-    Route::get('posts/{id}', [PostController::class, 'show']);  //view single post
-    Route::put('posts/{id}', [PostController::class, 'update']);  //update post
-    Route::delete('posts/{id}', [PostController::class, 'destroy']);  //delete post
+    Route::get('/posts', [PostController::class, 'index']);  //all posts
+    Route::post('/posts', [PostController::class, 'store']);  //create post
+    Route::get('/posts/{id}', [PostController::class, 'show']);  //view single post
+    Route::put('/posts/{id}', [PostController::class, 'update']);  //update post
+    Route::delete('/posts/{id}', [PostController::class, 'destroy']);  //delete post
 
     // Comments
-    Route::get('posts/{id}/comments', [CommentController::class, 'index']);  //all comments
-    Route::post('posts/{id}/comments', [CommentController::class, 'store']);  //create comments
-    Route::put('comments/{id}', [CommentController::class, 'update']);  //update comments
-    Route::delete('comments/{id}', [CommentController::class, 'destroy']);  //delete comments
+    Route::get('/posts/{id}/comments', [CommentController::class, 'index']);  //all comments
+    Route::post('/posts/{id}/comments', [CommentController::class, 'store']);  //create comments
+    Route::put('/comments/{id}', [CommentController::class, 'update']);  //update comments
+    Route::delete('/comments/{id}', [CommentController::class, 'destroy']);  //delete comments
 
     // Likes
-    Route::post('posts/{id}/likes', [LikeController::class, 'likeOrDislike']);  //likes or dislikes
+    Route::post('/posts/{id}/likes', [LikeController::class, 'likeOrDislike']);  //likes or dislikes
 });

@@ -10,29 +10,23 @@ class PostController extends Controller
 {
     public function index()
     {
-        $posts = Post::orderBy('created_at', 'desc')
-            ->with('user:id, name, image')
-            ->withCount('comments', 'likes')
-            ->with('likes', function ($like) {
-                return $like->where('user_id', auth()->user()->id)
-                    ->select('id', 'user_id', 'post_id')->get();
-            })
-            ->get();
-
-        $response = [
-            'post' => $posts
-        ];
-
-        return response($response, 200);
+        return response([
+            'posts' => Post::orderBy('created_at', 'desc')->with('user:id,name,image')->withCount('comments', 'likes')
+                ->with('likes', function ($like) {
+                    return $like->where('user_id', auth()->user()->id)
+                        ->select('id', 'user_id', 'post_id')->get();
+                })
+                ->get()
+        ], 200);
     }
 
-    public function store(Request $request, $image)
+    public function store(Request $request)
     {
         $attrs = $request->validate([
             'body' => 'required|string'
         ]);
 
-        $image = $this->saveImage($request->$image, 'posts');
+        $image = $this->saveImage($request->image, 'posts');
 
         $posts = Post::create([
             'body' => $attrs['body'],

@@ -20,22 +20,18 @@ class AuthController extends Controller
             'email'      => 'required|email|unique:users,email',
             'password'      => 'required|min:8|confirmed',
         ]);
+        //create user
+        $user = User::create([
+            'name' => $attrs['name'],
+            'email' => $attrs['email'],
+            'password' => bcrypt($attrs['password'])
+        ]);
 
-        // Create User
-        $user = new User();
-        $user->name = $attrs['name'];
-        $user->email = $attrs['email'];
-        $user->password = Hash::make('password');
-        $user->save();
-
-        $token = $user->createToken('secret')->plainTextToken;
-
-        $response = [
+        //return user & token in response
+        return response([
             'user' => $user,
-            'token' => $token
-        ];
-
-        return response($response, 200);
+            'token' => $user->createToken('secret')->plainTextToken
+        ], 200);
     }
 
     // Login Users
@@ -48,28 +44,23 @@ class AuthController extends Controller
             'password'      => 'required|min:8',
         ]);
 
-        $user = User::where('email', $attrs['email'])->first();
-
-        if (!$user || Hash::check($attrs['password'], $user->password)) {
+        if (!Auth::attempt($attrs)) {
             return response([
-                'message' => 'Invalid Credentials'
-            ], 401);
+                'message' => 'Invalid credentials.'
+            ], 403);
         }
 
-        $token = $user->createToken('secret')->plainTextToken;
-
-        $response = [
-            'user' => $user,
-            'token' => $token
-        ];
-
-        return response($response, 201);
+        //return user & token in response
+        return response([
+            'user' => auth()->user(),
+            'token' => auth()->user()->createToken('secret')->plainTextToken
+        ], 200);
     }
 
     // Logout Users
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        auth()->user()->tokens()->delete();
         return response([
             'message' => 'Logout success.'
         ], 200);
